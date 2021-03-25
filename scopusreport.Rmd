@@ -2,14 +2,13 @@
 title: "Análisis bibliométrico"
 author: "Alejandro Platas López \n`alejandroplatasl@gmail.com`\n"
 date: "`r Sys.Date()`"
-output: rmarkdown::github_document
-always_allow_html: true
-#  html_document:
-#    self_contained: true
+output: 
+  html_document:
+    keep_md: true
 ---
 
 ```{r include = FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.path = "README_figs/README-")
 library(bibliometrix)
 library(tidyverse)
 library(dimensionsR)
