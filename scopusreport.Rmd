@@ -1,0 +1,138 @@
+---
+title: "Análisis bibliométrico"
+author: "Alejandro Platas López \n`alejandroplatasl@gmail.com`\n"
+date: "`r Sys.Date()`"
+output: rmarkdown::github_document
+always_allow_html: true
+#  html_document:
+#    self_contained: true
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(bibliometrix)
+library(tidyverse)
+library(dimensionsR)
+library(kableExtra)
+
+file.scop = "../../dimensions/scopus.bib"
+
+scopus <- convert2df(file.scop, dbsource = "scopus", format = "bibtex")
+
+results.scop <- biblioAnalysis(scopus)
+
+g = plot(x=results.scop, k=10, pause=F)
+
+
+# Co-Word Analysis
+# Conceptual Structure using keywords (method="CA")
+CS <- conceptualStructure(scopus,field="AB", method="MCA", minDegree=25, clust=5, 
+                          stemming=FALSE, labelsize=10, documents=10, graph = FALSE)
+
+```
+
+# Bibliometría
+Los documentos se obtienen de la base de datos de **dimensions** con diferentes queries relacionados con ABMS y Técnicas de Machine Learning.
+
+Se descartan preprints y todo aquel documento que no tenga asociado un Identificador de objeto digital (DOI por sus siglas en inglés).
+
+
+## Principales resultados
+
+```{r}
+options(width = 300)
+summary(results.scop)
+```
+
+
+## Productividad global
+
+```{r biblioplot1, echo=FALSE, fig.height=6, fig.width=4.5, message=FALSE, warning=FALSE, paged.print=TRUE}
+g$MostProdAuthors
+g$MostProdCountries
+```
+
+## Productividad Anual
+```{r biblioplot2, echo=FALSE, fig.height=4, fig.width=9, message=FALSE, warning=FALSE, paged.print=TRUE}
+g$AnnualScientProd
+```
+
+## Citas por año
+```{r biblioplot3, echo=FALSE, fig.height=4, fig.width=9, message=FALSE, warning=FALSE, paged.print=TRUE}
+g$AverArtCitperYear
+```
+
+## Artículos más citados
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+CR <- citations(scopus, field = "article", sep = ";")
+knitr::kable(cbind(CR$Cited[1:10])) %>%
+  kable_styling(font_size = 18)
+  
+
+```
+
+## Primeros autores más citados
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+# most frequent cited first authors
+CR <- citations(scopus, field = "author", sep = ";")
+knitr::kable(cbind(CR$Cited[1:10])) %>%
+  kable_styling(font_size = 22)
+
+```
+
+## Productividad a lo largo del tiempo
+```{r biblioplot4, echo=FALSE, fig.height=4, fig.width=9, message=FALSE, warning=FALSE, paged.print=TRUE}
+# Top-Authors’ Productivity over the Time
+topAU <- authorProdOverTime(scopus, k = 10, graph = TRUE)
+```
+
+# Co-citación por Revista
+```{r message=FALSE, warning=FALSE, fig.height=9, fig.width=9}
+M=metaTagExtraction(scopus,"CR_SO",sep=";")
+NetMatrix <- biblioNetwork(M, analysis = "co-citation", network = "sources", sep = ";")
+net=networkPlot(NetMatrix, n = 40, Title = "Co-Citation Network", type = "auto", size.cex=TRUE, size=15, remove.multiple=FALSE, labelsize=0.7,edgesize = 10, edges.min=5)
+```
+
+## Co-ocurrencia de palabras clave
+```{r message=FALSE, warning=FALSE, fig.height=9, fig.width=9}
+NetMatrix <- biblioNetwork(scopus, analysis = "co-occurrences", network = "keywords", sep = ";")
+net=networkPlot(NetMatrix, normalize="association", n = 40, Title = "Keyword Co-occurrences", 
+            type = "fruchterman", size.cex=TRUE, size=20, remove.multiple=F, edgesize = 10, 
+            labelsize=3,label.cex=TRUE,label.n=30,edges.min=2)
+
+```
+
+## Colaboración de autores
+```{r message=FALSE, warning=FALSE, fig.height=6, fig.width=9}
+NetMatrix <- biblioNetwork(scopus, analysis = "collaboration",  network = "authors", sep = ";")
+net=networkPlot(NetMatrix,  n = 40, Title = "Author collaboration",type = "auto", size=10,size.cex=T,edgesize = 3,labelsize=0.6)
+
+```
+
+## Colaboración de Universidad
+```{r message=FALSE, warning=FALSE, fig.height=6, fig.width=9}
+NetMatrix <- biblioNetwork(scopus, analysis = "collaboration",  network = "universities", sep = ";")
+net=networkPlot(NetMatrix,  n = 30, Title = "Edu collaboration",type = "auto", size=10,size.cex=T,edgesize = 3,labelsize=0.6)
+
+```
+
+# Análisis de términos
+```{r message=FALSE, warning=FALSE, fig.height=7, fig.width=9}
+CS[[4]]
+```
+
+
+## Análisis de términos
+```{r message=FALSE, warning=FALSE, fig.height=6, fig.width=9}
+CS[[5]]
+```
+
+## Análisis de términos
+```{r message=FALSE, warning=FALSE, fig.height=9, fig.width=9}
+CS[[6]]
+```
+
+## Análisis de términos
+```{r message=FALSE, warning=FALSE, fig.height=9, fig.width=9}
+CS[[7]]
+```
